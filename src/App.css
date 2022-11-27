@@ -62,3 +62,22 @@
 .size {
   margin-bottom: .5rem;
 }
+
+.encounterMonster {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+form {
+  margin: 1rem;
+}
+
+h1 {
+  background-color: #282c34;
+  color: azure;
+  max-width: 75%;
+  margin-bottom: 2rem;
+  padding: 1rem;
+}

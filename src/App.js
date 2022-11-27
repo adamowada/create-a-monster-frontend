@@ -7,6 +7,8 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Spinner from "react-bootstrap/Spinner";
+import Accordion from "react-bootstrap/Accordion";
+import Carousel from "react-bootstrap/Carousel";
 import axios from "axios";
 
 class App extends React.Component {
@@ -14,14 +16,21 @@ class App extends React.Component {
     super(props);
     this.state = {
       monsters: [],
+      encounters: [],
     };
   }
 
-  handleSubmit = async (e) => {
+  handleMonsterSubmit = async (e) => {
     e.preventDefault();
-    document.getElementById("submitButton").setAttribute("disabled", "true");
-    document.getElementById("submitButton").classList.add("class", "visually-hidden");
-    document.getElementById("loadingButton").classList.remove("visually-hidden");
+    document
+      .getElementById("submitMonsterButton")
+      .setAttribute("disabled", "true");
+    document
+      .getElementById("submitMonsterButton")
+      .classList.add("class", "visually-hidden");
+    document
+      .getElementById("loadingMonsterButton")
+      .classList.remove("visually-hidden");
     try {
       const API = process.env.REACT_APP_API_URL;
       const url = `${API}/monster`;
@@ -34,10 +43,69 @@ class App extends React.Component {
       });
       console.log(response.data);
       this.setState({ monsters: [...this.state.monsters, response.data] });
-      document.querySelector("form").reset();
-      document.getElementById("loadingButton").classList.add("class", "visually-hidden");
-      document.getElementById("submitButton").classList.remove("visually-hidden");
-      document.getElementById("submitButton").removeAttribute("disabled");
+      document.getElementById("monsterForm").reset();
+      document
+        .getElementById("loadingMonsterButton")
+        .classList.add("class", "visually-hidden");
+      document
+        .getElementById("submitMonsterButton")
+        .classList.remove("visually-hidden");
+      document
+        .getElementById("submitMonsterButton")
+        .removeAttribute("disabled");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  handleEncounterSubmit = async (e) => {
+    e.preventDefault();
+    let request = "";
+    for (let i = 0; i < this.state.monsters.length; i++) {
+      if (e.target[`monster${i}`].value > 0) {
+        request += `${e.target[`monster${i}`].value} ${
+          this.state.monsters[i].monster
+        }`;
+        if (e.target[`monster${i}`].value > 1) {
+          request += "s";
+        }
+        request += ", ";
+      }
+    }
+    console.log(request);
+    if (request === "") {
+      alert("You have to submit at least 1 monster to build an encounter!");
+      return;
+    }
+    document
+      .getElementById("submitEncounterButton")
+      .setAttribute("disabled", "true");
+    document
+      .getElementById("submitEncounterButton")
+      .classList.add("class", "visually-hidden");
+    document
+      .getElementById("loadingEncounterButton")
+      .classList.remove("visually-hidden");
+    try {
+      const API = process.env.REACT_APP_API_URL;
+      const url = `${API}/encounter`;
+      const response = await axios.get(url, {
+        params: {
+          monsters: request,
+        },
+      });
+      console.log(response.data);
+      this.setState({ encounters: [...this.state.encounters, response.data] });
+      document.getElementById("encounterForm").reset();
+      document
+        .getElementById("loadingEncounterButton")
+        .classList.add("class", "visually-hidden");
+      document
+        .getElementById("submitEncounterButton")
+        .classList.remove("visually-hidden");
+      document
+        .getElementById("submitEncounterButton")
+        .removeAttribute("disabled");
     } catch (error) {
       console.error(error);
     }
@@ -46,47 +114,141 @@ class App extends React.Component {
   render() {
     return (
       <Container>
+        <Row key="carousel">
+          <h1 className="text-center w-75 mx-auto">AI Generated Monsters and Adventures!</h1>
+          <Carousel fade className="w-75 mx-auto mb-3">
+            <Carousel.Item>
+              <img
+                className="d-block w-100"
+                src="https://images.unsplash.com/photo-1529981188441-8a2e6fe30103?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2670&q=80"
+                alt="First slide"
+              />
+              <Carousel.Caption>
+                <h3>Harness the Power of AI</h3>
+                <p>
+                  Adventures limited only by imagination
+                </p>
+              </Carousel.Caption>
+            </Carousel.Item>
+          </Carousel>
+        </Row>
         <Row key="a">
           <Col>
             <Form
-              onSubmit={this.handleSubmit}
-              className="mx-auto p-3 border border-primary border-2 rounded"
+              onSubmit={this.handleMonsterSubmit}
+              className="w-75 mx-auto p-3 border border-primary border-2 rounded"
+              id="monsterForm"
             >
               <Form.Group className="mb-3" controlId="description">
                 <Form.Label>Description of Monster</Form.Label>
-                <Form.Control type="text" placeholder="eg. large and scary" required />
+                <Form.Control type="text" placeholder="eg. large and scary" />
                 <Form.Text className="text-muted">
                   Enter the monster's description.
                 </Form.Text>
               </Form.Group>
               <Form.Group className="mb-3" controlId="type">
                 <Form.Label>Type of Monster</Form.Label>
-                <Form.Control type="text" placeholder="eg. Elephant Zombie" required />
+                <Form.Control type="text" placeholder="eg. Elephant Zombie" />
                 <Form.Text className="text-muted">
                   Enter the monster's species.
                 </Form.Text>
               </Form.Group>
-              <Form.Group className="mb-3 w-25" controlId="cr">
+              <Form.Group className="mb-3 w-50" controlId="cr">
                 <Form.Label>Challenge Rating</Form.Label>
-                <Form.Control type="number" min="1" max="25" required />
+                <Form.Control type="number" min="1" max="25" />
               </Form.Group>
-              <Button variant="primary" type="submit" id="submitButton">
-                Submit
+              <Button variant="primary" type="submit" id="submitMonsterButton">
+                Generate Monster
               </Button>
-              <Button variant="primary" disabled className="visually-hidden" id="loadingButton">
+              <Button
+                variant="primary"
+                disabled
+                className="visually-hidden"
+                id="loadingMonsterButton"
+              >
                 <Spinner
                   as="span"
                   animation="border"
                   size="sm"
                   role="status"
                   aria-hidden="true"
-                />
-                {' '}Loading...
+                />{" "}
+                Loading...
               </Button>
             </Form>
           </Col>
         </Row>
         <Row key="b">
+          {this.state.monsters.length ? (
+            <Col>
+              <Form
+                onSubmit={this.handleEncounterSubmit}
+                className="w-75 mx-auto p-3 border border-primary border-2 rounded"
+                id="encounterForm"
+              >
+                <h3 className="text-center">Make a random encounter!</h3>
+                {this.state.monsters.map((monster, i) => {
+                  return (
+                    <Form.Group
+                      className="mb-3 w-50"
+                      controlId={`monster${i}`}
+                      key={i}
+                    >
+                      <Form.Label>Number of {monster.monster}s</Form.Label>
+                      <Form.Control
+                        type="number"
+                        min="0"
+                        max="100"
+                        defaultValue={0}
+                      />
+                    </Form.Group>
+                  );
+                })}
+                <Button
+                  variant="primary"
+                  type="submit"
+                  id="submitEncounterButton"
+                >
+                  Make Encounter
+                </Button>
+                <Button
+                  variant="primary"
+                  disabled
+                  className="visually-hidden"
+                  id="loadingEncounterButton"
+                >
+                  <Spinner
+                    as="span"
+                    animation="border"
+                    size="sm"
+                    role="status"
+                    aria-hidden="true"
+                  />{" "}
+                  Loading...
+                </Button>
+              </Form>
+            </Col>
+          ) : (
+            <></>
+          )}
+        </Row>
+        <Row key="c">
+          {this.state.encounters.length ? (
+            <Accordion defaultActiveKey="0" className="w-75 mx-auto">
+              {this.state.encounters.map((encounter, i) => {
+                return (
+                  <Accordion.Item eventKey={i} key={i}>
+                    <Accordion.Header>Encounter {i + 1}</Accordion.Header>
+                    <Accordion.Body>{encounter}</Accordion.Body>
+                  </Accordion.Item>
+                );
+              })}
+            </Accordion>
+          ) : (
+            <></>
+          )}
+        </Row>
+        <Row key="d">
           {this.state.monsters.length ? (
             this.state.monsters.map((monster, i) => {
               return (
